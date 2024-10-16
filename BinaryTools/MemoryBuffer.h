@@ -6,12 +6,13 @@
 #include <algorithm>
 #include <numeric>
 #include <limits>
+#include <cstring>
 
 //Simple wrapper around std::streambuf representing a memory buffer.
 //Used by BinaryReader and BinaryWriter
 struct MemoryBuffer : std::streambuf
 {
-    MemoryBuffer(char* begin, char* end)
+    [[maybe_unused]] MemoryBuffer(char* begin, char* end)
     {
         this->setg(begin, begin, end);
     }
@@ -19,6 +20,8 @@ struct MemoryBuffer : std::streambuf
     {
         this->setg(begin, begin, begin + sizeInBytes);
     }
+
+
 };
 
 //Used by BinaryReader for reading from in memory buffers.
@@ -53,16 +56,10 @@ public:
     using BaseT::traits_type;
 
 public:
-    basic_memstreambuf()
-        : BaseT()
-    { }
-
-    explicit basic_memstreambuf(const basic_memstreambuf& rhs)
-        : BaseT(rhs)
-    { }
+    basic_memstreambuf() = default;
 
     // non-standard
-    explicit basic_memstreambuf(const std::basic_string<char_type>& s)
+    [[maybe_unused]] explicit basic_memstreambuf(const std::basic_string<char_type>& s)
         : BaseT()
     {
         //assert(!s.empty());
@@ -84,7 +81,7 @@ public:
     }
 
     // non-standard
-    basic_memstreambuf(const char_type* begin, const char_type* end)
+    [[maybe_unused]] basic_memstreambuf(const char_type* begin, const char_type* end)
         : BaseT()
     {
         //assert(begin);
@@ -93,7 +90,7 @@ public:
 
         // check size
         const std::uintmax_t count = end - begin;
-        const std::uintmax_t maxValue = static_cast<std::uintmax_t>(std::numeric_limits<std::streamsize>::max());
+        const auto maxValue = static_cast<std::uintmax_t>(std::numeric_limits<std::streamsize>::max());
         if (count > maxValue)
         {
             throw std::invalid_argument("basic_memstreambuf too big");
@@ -109,7 +106,7 @@ public:
 
 
 protected:
-    virtual std::streamsize showmanyc() override
+    std::streamsize showmanyc() override
     {
         const auto* ptr = gptr();
         const auto* end = egptr();
@@ -119,7 +116,7 @@ protected:
         return (ptr <= end) ? (end - ptr) : 0;
     }
 
-    virtual int_type underflow() override
+    int_type underflow() override
     {
         const auto* ptr = gptr();
 
@@ -129,7 +126,7 @@ protected:
         return traits_type::to_int_type(*ptr);
     }
 
-    virtual std::streamsize xsgetn(char_type* s, std::streamsize count) override
+    std::streamsize xsgetn(char_type* s, std::streamsize count) override
     {
         if (count == 0)
             return 0;
@@ -151,7 +148,7 @@ protected:
         }
     }
 
-    virtual pos_type seekoff(
+    pos_type seekoff(
         off_type off,
         std::ios_base::seekdir dir,
         std::ios_base::openmode which = std::ios_base::in) override
@@ -208,7 +205,7 @@ protected:
         return gptr() - eback();
     }
 
-    virtual pos_type seekpos(
+    pos_type seekpos(
         pos_type pos,
         std::ios_base::openmode which = std::ios_base::in) override
     {

@@ -138,7 +138,7 @@ int main()
         int b;
     };
 
-    std::array<test, 3> testArray;
+    std::array<test, 3> testArray{};
     testArray[0] = test{ 2, 3 };
     testArray[1] = test{ 4, 5 };
     testArray[2] = test{ 6, 7 };
